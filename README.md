@@ -2,14 +2,14 @@
 การบูรณะภาพจิตรกรรมฝาผนังไทยด้วยโมเดลDiffPIR
 
 # Project Overview | ภาพรวมของโครงการ
-This project aims to restore and enhance damaged Thai mural paintings using deep learning–based inpainting techniques.
-We fine-tuned and extended the DiffPIR model for Thai mural restoration, developed a Flask web interface, and created a custom dataset for real-world applications.
-โครงการนี้เป็นระบบฟื้นฟูภาพจิตรกรรมฝาผนังไทยโดยใช้โมเดลDiffPIR Model
-ซึ่งเป็นเทคนิคการประมวลผลภาพด้วยโมเดล Diffusion ที่ช่วยซ่อมแซมรายละเอียดของภาพที่เสียหายและถูกลบเลือนได้อย่างมีประสิทธิภาพให้เหมาะสมกับภาพจิตรกรรมไทย
+This project aims to restore and enhance damaged Thai mural paintings using deep learning–based inpainting techniques.<br>
+We fine-tuned and extended the DiffPIR model for Thai mural restoration, developed a Flask web interface, and created a custom dataset for real-world applications.<br>
+โครงการนี้เป็นระบบฟื้นฟูภาพจิตรกรรมฝาผนังไทยโดยใช้โมเดลDiffPIR Model<br>
+ซึ่งเป็นเทคนิคการประมวลผลภาพด้วยโมเดล Diffusion ที่ช่วยซ่อมแซมรายละเอียดของภาพที่เสียหายและถูกลบเลือนได้อย่างมีประสิทธิภาพให้เหมาะสมกับภาพจิตรกรรมไทย<br>
 พร้อมทั้งพัฒนา Web Application เพื่อใช้งานจริง
 
 # Model & Methodology | โมเดลและกระบวนการ
-1.Mask Generation – สร้างมาสก์อัตโนมัติระบุบริเวณที่ชำรุด
+1.Mask Generation – สร้างมาสก์อัตโนมัติระบุบริเวณที่ชำรุด<br>
 2.DiffPIR Restoration – ใช้การประมวลผลภาพแบบ diffusion ในการเติมเต็มส่วนที่หายไป
 
 # System Overview | สถาปัตยกรรมระบบ
