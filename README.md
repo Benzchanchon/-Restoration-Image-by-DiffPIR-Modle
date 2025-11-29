@@ -53,3 +53,12 @@ Advisor: Asst. Prof. Dr. Sunisa Pongpinijpinyo<br>
 
 Email: chanchon1150@gmail.com<br>
 GitHub: @Benzchanchon<br>
+
+This project is based on the original DiffPIR implementation by<br>
+yuanzhi-zhu/DiffPIR<br>
+
+We have fine-tuned and expanded it for Thai mural restoration,<br>
+with additional dataset preparation, automatic mask generation,<br>
+and a web-based interface for real-world use.
+
+
