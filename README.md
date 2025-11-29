@@ -38,7 +38,6 @@ LPIPS	วัดคุณภาพเชิงการรับรู้ (Percep
 เนื่องจากไฟล์น้ำหนักโมเดล (Pretrained Weights)มีขนาดใหญ่เกินกว่าที่ GitHub จะรองรับได้ ผู้ใช้งานสามารถดาวน์โหลดไฟล์ทั้งหมดได้ผ่าน Google Drive ตามลิงก์ด้านล่างนี้<br>
 Because the pretrained model weights are too large to be stored directly on GitHub, all required files can be downloaded via the Google Drive link below:<br>
 https://drive.google.com/file/d/1fqbSCxD_XIibrSaiXxj9ilN2P9ovyea4/view?usp=sharing<br>
-ไฟล์น้ำหนักโมเดลที่ผ่านการฝึกแล้ว (.pt)<br>
 ให้นำไฟล์น้ำหนักโมเดล (.pt) ที่ดาวน์โหลดมา<br>
 ไปวางไว้ในโฟลเดอร์ model_zoo/<br>
 เพื่อให้ระบบสามารถโหลดโมเดลได้อย่างถูกต้องระหว่างการประมวลผล<br>
