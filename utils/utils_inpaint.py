@@ -64,7 +64,7 @@ def shepard_initialize(image, measurement_mask, window=5, p=2):
 
 ### Mask generator from https://github.com/DPS2022/diffusion-posterior-sampling/
 
-def random_sq_bbox(img, mask_shape, image_size=256, margin=(16, 16)):
+def random_sq_bbox(img, mask_shape, image_size=512, margin=(16, 16)):
     """Generate a random sqaure mask for inpainting
     """
     B, C, H, W = img.shape
@@ -85,7 +85,7 @@ def random_sq_bbox(img, mask_shape, image_size=256, margin=(16, 16)):
 
 class mask_generator:
     def __init__(self, mask_type, mask_len_range=None, mask_prob_range=None,
-                 image_size=256, margin=(16, 16)):
+                 image_size=512, margin=(16, 16)):
         """
         (mask_len_range): given in (min, max) tuple.
         Specifies the range of box size in each dimension

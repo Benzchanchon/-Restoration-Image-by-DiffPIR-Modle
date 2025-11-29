@@ -5,7 +5,7 @@ hdf5storage==0.1.19
 blobfile==2.0.1
 matplotlib==3.6.3
 matplotlib-inline==0.1.6
-scipy==1.10.0
+scipy==1.11.1
 # mpi4py==3.1.4
 lpips==0.1.4
 --extra-index-url https://download.pytorch.org/whl/cu117

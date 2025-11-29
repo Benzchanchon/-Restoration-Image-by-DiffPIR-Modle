@@ -5,24 +5,8 @@ import logging
 import numpy as np
 import torch
 import argparse
-import time
 from datetime import datetime
 from collections import OrderedDict
-import sys
-sys.stdout.reconfigure(encoding='utf-8')
-sys.stderr.reconfigure(encoding='utf-8')
-#บังคับ logger ให้เขียนไฟล์ log ด้วย UTF-8
-for handler in logging.root.handlers[:]:
-    logging.root.removeHandler(handler)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s : %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler("log_output.log", encoding='utf-8')  #ทำให้logพิมไทยได้
-    ]
-)
 
 from utils import utils_model
 from utils import utils_logger
@@ -33,13 +17,13 @@ from utils.utils_inpaint import mask_generator
 # from guided_diffusion import dist_util
 from guided_diffusion.script_util import (
     NUM_CLASSES,
-    model_and_diffusion_defaults, 
+    model_and_diffusion_defaults,
     create_model_and_diffusion,
     args_to_dict,
 )
 
 def main():
-    
+    #ระบบรับพารามิเตอร์จากภายนอกให้กับไฟล์
     parser = argparse.ArgumentParser()
     parser.add_argument("--mask_path", type=str, default=None, help="Path to mask directory")
     parser.add_argument("--testset_dir", type=str, default="demo_test", help="Name of testset folder")
@@ -52,13 +36,14 @@ def main():
     noise_level_model       = noise_level_img   # set noise level of model, default: 0
     model_name              = 'ema_0.9999_750450'  # 256x256_diffusion_uncond, diffusion_ffhq_10m; set diffusino model
     testset_name = args.testset_dir
+    #กำหนดพาธของภาพทดสอบและไฟล์มาสก์
     if args.mask_path is not None:
         mask_dir = args.mask_path   # เช่น testsets/demo_test/gt_keep_masks
     else:
         mask_dir = os.path.join("testsets", testset_name, "gt_keep_masks")
-
-    num_train_timesteps     = 1000
-    iter_num                = 20              # set number of iterations
+    #ตั้งค่าการทำงานของ diffusion
+    num_train_timesteps     = 1000      #เพิ่มnoiseไป1000รอบ
+    iter_num                = 20              # set number of iterations//ย้อนลบnoiseไป20รอบ
     iter_num_U              = 1                 # set number of inner iterations, default: 1
     skip                    = num_train_timesteps//iter_num     # skip interval
     mask_name               = 'gt_keep_masks/patch_052.png'   # mask path for loading mask img
@@ -91,7 +76,7 @@ def main():
     model_zoo               = os.path.join(cwd, 'model_zoo')    # fixed
     testsets                = os.path.join(cwd, 'testsets')     # fixed
     results                 = os.path.join(cwd, 'results')      # fixed
-    result_name             = f'{testset_name}_{task_current}_{generate_mode}_{mask_type}_{model_name}_sigma{noise_level_img}_NFE{iter_num}_eta{eta}_zeta{zeta}_lambda{lambda_}'
+    result_name             = f'result_image'
     model_path              = os.path.join(model_zoo, model_name+'.pt')
     device                  = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.cuda.empty_cache()
@@ -119,10 +104,8 @@ def main():
     # ----------------------------------------
     # L_path, E_path, H_path, mask_path
     # ----------------------------------------
-
-    L_path                  = os.path.join(testsets, testset_name, "demotest")
-    L_paths = util.get_image_paths(L_path)
-
+    #ตั้ง path
+    L_path = os.path.join(testsets, testset_name)
     E_path                  = os.path.join(results, result_name)        # E_path, for Estimated images
     mask_path               = os.path.join(testsets, mask_name)         # mask_path, for mask images
     util.mkdir(E_path)
@@ -148,11 +131,9 @@ def main():
             attention_resolutions="8,16,32",
         )
     args = utils_model.create_argparser(model_config).parse_args([])
+    #โหลดโมเดล Diffusion
     model, diffusion = create_model_and_diffusion(
         **args_to_dict(args, model_and_diffusion_defaults().keys()))
-    # model.load_state_dict(
-    #     dist_util.load_state_dict(args.model_path, map_location="cpu")
-    # )
     model.load_state_dict(torch.load(args.model_path, map_location="cpu"))
     model.eval()
     for k, v in model.named_parameters():
@@ -177,10 +158,9 @@ def main():
         test_results['psnr'] = []
         if calc_LPIPS:
             test_results['lpips'] = []
-        total_time = 0
-        #idxคือตัวนับลำดับในการตั้งชือไฟล์result_001,result_002
+
         for idx, img in enumerate(L_paths):
-            start_time = time.time()
+
             # --------------------------------
             # (1) get img_H and img_L
             # --------------------------------
@@ -192,21 +172,19 @@ def main():
             # --------------------------------
             # (2) initialize x
             # --------------------------------
-            #จับคู่ภาพinputกับmask
             if load_mask:
                 img_name, ext = os.path.splitext(os.path.basename(img))
                 mask_file = os.path.join(mask_dir, img_name + ".png")
                 if not os.path.exists(mask_file):
                     raise FileNotFoundError(f"[ERROR] No matching mask for {img_name} at {mask_file}")
                 mask = util.imread_uint(mask_file, n_channels=n_channels).astype(bool)
-            #เอาภาพmaskมาทับภาพต้นฉบับแล้วลบสีดำออกจากภาพ
-            #img_Hคือภาพinput
-            img_L = img_H * mask  / 255.   #ลบสีดำออกด้วการหาร255
+            #img_L คือ ภาพ input ที่มี “รูโหว่” ตรงตำแหน่งที่เราต้องการให้โมเดลซ่อมแซม
+            img_L = img_H * mask  / 255.   #(256,256,3)         [0,1]
 
             np.random.seed(seed=0)  # for reproducibility
-            #ทำการเพิ่มnoiseลงภาพที่เตรียมไว้
-            img_L = img_L * 2 - 1
-            img_L += np.random.normal(0, noise_level_img * 2, img_L.shape) # เพิ่มnoiseทั้งภาพ
+            #เพิ่ม noise เข้าไปเพื่อเข้าสู่กระบวนการ diffusion
+            img_L = img_L * 2 - 1 
+            img_L += np.random.normal(0, noise_level_img * 2, img_L.shape) # add AWGN เพิ่มnoise
             img_L = img_L / 2 + 0.5
             img_L = img_L * mask
 
@@ -219,6 +197,8 @@ def main():
             sqrt_alpha_effective = sqrt_alphas_cumprod[t_start] / sqrt_alphas_cumprod[t_y]
             x = sqrt_alpha_effective * y + torch.sqrt(sqrt_1m_alphas_cumprod[t_start]**2 - \
                     sqrt_alpha_effective**2 * sqrt_1m_alphas_cumprod[t_y]**2) * torch.randn_like(y)
+              
+
             # --------------------------------
             # (3) get rhos and sigmas
             # --------------------------------
@@ -226,7 +206,7 @@ def main():
             sigmas = []
             sigma_ks = []
             rhos = []
-            for i in range(num_train_timesteps):
+            for i in range(num_train_timesteps): #กระบวนการลบnoiseออกและเติมรายละเอียดกลับเข้าไป
                 sigmas.append(reduced_alpha_cumprod[num_train_timesteps-1-i])
                 if model_out_type == 'pred_xstart':
                     sigma_ks.append((sqrt_1m_alphas_cumprod[i]/sqrt_alphas_cumprod[i]))
@@ -264,7 +244,6 @@ def main():
                 for u in range(iter_num_U):
                     # --------------------------------
                     # step 1, reverse diffsuion step
-                    #ค่อยๆลบnoiseออก
                     # --------------------------------
 
                     # add noise, make the image noise level consistent in pixel level
@@ -289,7 +268,7 @@ def main():
                         # solve sub-problem
                         if sub_1_analytic:
                             if model_out_type == 'pred_xstart':
-                                # when noise level less than given image noise, skip
+                                # when noise level less than given image noise, skip บริเวณที่ “ไม่ถูก mask” เราเอาภาพจริงกลับมาใช้เลย (ไม่ให้โมเดลแตะ)
                                 if i < num_train_timesteps-noise_model_t:    
                                     x0_p = (mask*y + rhos[t_i].float()*x0).div(mask+rhos[t_i])
                                     x0 = x0 + guidance_scale * (x0_p-x0)
@@ -339,27 +318,27 @@ def main():
                     if show_img:
                         util.imshow(x_show)
 
-            # recover conditional part
+            # recover conditional part กันไม่ให้โมเดลเปลี่ยนส่วนที่ไม่ได้mask
             if generate_mode in ['repaint','DiffPIR']:
                 x[mask.to(torch.bool)] = y[mask.to(torch.bool)]
 
             # --------------------------------
             # (4) save process
             # --------------------------------
-            #x_0 คือ ภาพที่โมเดล DiffPIR ฟื้นฟูเสร็จแล้ว
+            
             img_E = util.tensor2uint(x_0)
-            #ใช้ฟังชันcalculate_psnrจากutils_image
-            psnr = util.calculate_psnr(img_E, img_H, border=0)  # change with your own border
+            # คำนวณpsnr
+            psnr = util.calculate_psnr(img_E, img_H, border=0)  
             test_results['psnr'].append(psnr)
                     
             if calc_LPIPS:
-                #แปลงภาพinput (img_H) ให้เป็น tensor
                 img_H_tensor = np.transpose(img_H, (2, 0, 1))
                 img_H_tensor = torch.from_numpy(img_H_tensor)[None,:,:,:].to(device)
                 img_H_tensor = img_H_tensor / 255 * 2 -1
                 lpips_score = loss_fn_vgg(x_0.detach()*2-1, img_H_tensor)
                 lpips_score = lpips_score.cpu().detach().numpy()[0][0][0][0]
                 test_results['lpips'].append(lpips_score)
+
                 logger.info('{:->4d}--> {:>10s} PSNR: {:.4f}dB LPIPS: {:.4f} ave LPIPS: {:.4f}'.format(idx, img_name+ext, psnr, lpips_score, sum(test_results['lpips']) / len(test_results['lpips'])))
             else:
                 logger.info('{:->4d}--> {:>10s} PSNR: {:.4f}dB'.format(idx, img_name+ext, psnr))
@@ -399,11 +378,7 @@ def main():
                         util.imshow(img_total,figsize=(80,4))
                     if save_progressive_mask:
                         util.imsave(img_total*255., os.path.join(E_path, img_name+'_process_mask_lambda_{:.3f}_{}{}'.format(lambda_,current_time,ext)))
-                
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-            total_time += elapsed_time
-            logger.info(f" เวลาในการประมวลผลภาพ {img_name}{ext}: {elapsed_time:.2f} วินาที")
+
         # --------------------------------
         # Average PSNR and LPIPS
         # --------------------------------
@@ -414,24 +389,13 @@ def main():
         if calc_LPIPS:
             ave_lpips = sum(test_results['lpips']) / len(test_results['lpips'])
             logger.info('------> Average LPIPS of ({}), sigma: ({:.3f}): {:.4f}'.format(testset_name, noise_level_model, ave_lpips))
-        
-        avg_time_per_image = total_time / len(L_paths) if L_paths else 0
-        logger.info(f" เวลารวมทั้งหมด: {total_time:.2f} วินาที")
-        logger.info(f" เวลาเฉลี่ยต่อภาพ: {avg_time_per_image:.2f} วินาที")
-
-        return test_results
 
     # experiments
     lambdas = [lambda_*i for i in range(1,2)]
-    all_psnr = []
-    all_lpips = []
     for lambda_ in lambdas:
-        for zeta_i in [zeta * i for i in range(1, 2)]:
-            results = test_rho(lambda_, zeta=zeta_i)
-            all_psnr.extend(results['psnr'])
-            if calc_LPIPS:
-                all_lpips.extend(results['lpips'])
-
+        #for zeta_i in [0,0.3,0.8,0.9,1.0]:
+        for zeta_i in [zeta*i for i in range(1,2)]:
+            test_rho(lambda_, zeta=zeta_i)
 
 if __name__ == '__main__':
 

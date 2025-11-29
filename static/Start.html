@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟื้นฟูภาพจิตกรรมฝาผนังไทย</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="Start.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="title">
+            <h1>ฟื้นฟูภาพจิตกรรมฝาผนังไทย</h1>
+            <p class="subtitle">เทคนิค AI ช่วยฟื้นฟูภาพเก่าและจิตกรรมไทยให้กลับมาสวยงามอีกครั้ง</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Upload Section -->
+        <div class="upload-section" id="upload-section">
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">ลากไฟล์ภาพมาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
+                <div class="upload-subtext">รองรับไฟล์: JPG, PNG, JPEG (ขนาดไม่เกิน 50MB)</div>
+            </div>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <!-- Editor Section -->
+        <div class="editor-section" id="editor-section">
+            <div class="editor-title">🎨 เลือกพื้นที่ที่ต้องการฟื้นฟู</div>
+
+            <div class="controls">
+                <button class="control-btn" id="zoom-in-btn">
+                    🔍 ซูมเข้า
+                </button>
+                <button class="control-btn" id="zoom-out-btn">
+                    🔍 ซูมออก
+                </button>
+                <button class="control-btn" id="reset-zoom-btn">
+                    🎯 รีเซ็ตซูม
+                </button>
+                <button class="control-btn" id="undo-btn" disabled>
+                    ↶ ยกเลิก
+                </button>
+                <button class="control-btn" id="clear-btn" disabled>
+                    🗑️ ล้างทั้งหมด
+                </button>
+                <button class="control-btn" id="change-image-btn" onclick="changeImage()">
+                    🔄 เปลี่ยนรูปภาพ
+                </button>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="editor-canvas"></canvas>
+            </div>
+
+            <div class="instructions">
+                <h3>วิธีการใช้งาน:</h3>
+                <ul>
+                    <li>ลากเมาส์เพื่อวาดสี่เหลี่ยมครอบพื้นที่ที่ต้องการฟื้นฟู</li>
+                    <li>กด Ctrl/Cmd ค้างแล้วลากเพื่อเลื่อนภาพ</li>
+                    <li>ใช้ปุ่มซูมเพื่อดูรายละเอียดได้ชัดขึ้น หรือใช้ล้อเมาส์</li>
+                    <li>ใช้ปุ่ม "รีเซ็ตซูม" เพื่อกลับไปยังขนาดเดิม</li>
+                    <li>ใช้ปุ่ม "ยกเลิก" เพื่อลบสี่เหลี่ยมล่าสุด</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="process-btn" id="process-btn" onclick="startProcessing()">
+                    🚀 เริ่มต้นการฟื้นฟู
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">กำลังประมวลผล... 0%</div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section" id="result-section">
+            <div class="result-title">✨ การฟื้นฟูเสร็จสมบูรณ์! ✨</div>
+            <div class="result-image">
+                <img id="restored-result" alt="Restored image">
+            </div>
+            <br>
+            <button class="download-btn" onclick="downloadResult()">
+                💾 ดาวน์โหลดภาพที่ฟื้นฟูแล้ว
+            </button>
+        </div>
+    </main>
+    <script src="Start.js"></script>
+</body>
+
+</html>

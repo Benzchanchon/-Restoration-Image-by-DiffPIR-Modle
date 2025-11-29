@@ -3,7 +3,7 @@ seed: 42
 
 noise_level_img: 12.75
 noise_level_model: noise_level_img
-model_name: diffusion_ffhq_10m
+model_name: ema_0.9999_000150
 testset_name: demo_test
 num_train_timesteps: 1000
 iter_num: 100

@@ -3,7 +3,8 @@ seed: 42
 
 noise_level_img: 0
 noise_level_model: noise_level_img
-model_name: diffusion_ffhq_10m
+model_path: experiments/pretrained_models/ema_0.9999_000150.pt
+model_name: ema_0.9999_000150
 testset_name: demo_test
 num_train_timesteps: 1000
 iter_num: 20
@@ -42,4 +43,3 @@ mask_type: 'random'  #['box', 'random', 'both', 'extreme']
 mask_len_range: [128, 129]
 mask_prob_range: [0.5, 0.5]
 save_progressive_mask: false
-
